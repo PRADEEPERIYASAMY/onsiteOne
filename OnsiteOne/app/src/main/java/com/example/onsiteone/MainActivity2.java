@@ -16,6 +16,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.onsiteone.clock.TimerView;
 
@@ -110,11 +111,26 @@ public class MainActivity2 extends AppCompatActivity {
     }
 
     @Override
-    public void onSaveInstanceState( @NonNull Bundle outState , @NonNull PersistableBundle outPersistentState ) {
+    public void onSaveInstanceState( Bundle outState) {
         outState.putInt ( "seconds",sec );
         outState.putInt ( "minutes",minutes );
         outState.putInt ( "hours",hours );
-        super.onSaveInstanceState ( outState , outPersistentState );
+        outState.putInt ( "countSeconds",seconds );
+        super.onSaveInstanceState ( outState );
+    }
+
+    @Override
+    protected void onRestoreInstanceState( Bundle savedInstanceState ) {
+        super.onRestoreInstanceState ( savedInstanceState );
+        sec = savedInstanceState.getInt ( "seconds" );
+        minutes = savedInstanceState.getInt ( "minutes" );
+        hours = savedInstanceState.getInt ( "hours" );
+        seconds = savedInstanceState.getInt ( "countSeconds" );
+        timeSetter ();
+        play.setText ( "play" );
+        playimg.setImageResource ( R.drawable.play );
+        Toast.makeText ( getApplicationContext (),String.valueOf ( seconds ),Toast.LENGTH_SHORT ).show ();
+
     }
 
     private void timeHandler(){
@@ -150,14 +166,6 @@ public class MainActivity2 extends AppCompatActivity {
     protected void onPause() {
         super.onPause ();
         running = false;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume ();
-        if (play.getText ().toString () != "play" && started ) {
-            running = true;
-        }
     }
 
     private void timeSetter (){
@@ -208,7 +216,9 @@ public class MainActivity2 extends AppCompatActivity {
             public void onClick( View v ) {
                 full ();
                 alertDialog.cancel ();
-                running = true;
+                if (play.getText ().toString () != "play"){
+                    running = true;
+                }
                 mediaPlayer2.start ();
             }
         } );
