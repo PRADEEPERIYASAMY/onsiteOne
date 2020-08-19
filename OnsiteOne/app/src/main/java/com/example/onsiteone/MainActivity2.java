@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.PersistableBundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -117,7 +118,10 @@ public class MainActivity2 extends AppCompatActivity {
     }
 
     private void timeHandler(){
-        final Handler handler = new Handler();
+
+        HandlerThread thread = new HandlerThread("MyHandlerThread");
+        thread.start();
+        final Handler handler = new Handler(thread.getLooper());
 
         handler.post(new Runnable() {
             @Override
