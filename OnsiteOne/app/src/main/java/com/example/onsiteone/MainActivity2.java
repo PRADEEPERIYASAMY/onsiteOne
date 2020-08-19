@@ -30,7 +30,8 @@ public class MainActivity2 extends AppCompatActivity {
     private ImageView resetimg,playimg;
     private int hours,minutes,sec;
     private MediaPlayer mediaPlayer1,mediaPlayer2,mediaPlayer3;
-    private boolean started;
+    private HandlerThread thread;
+    private boolean touched;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -62,14 +63,6 @@ public class MainActivity2 extends AppCompatActivity {
         secText = findViewById ( R.id.seconds );
         resetimg = findViewById ( R.id.reset_img );
         playimg = findViewById ( R.id.play_img );
-        started = false;
-
-
-        if (savedInstanceState != null){
-            sec = savedInstanceState.getInt ( "seconds" );
-            minutes = savedInstanceState.getInt ( "minutes" );
-            hours = savedInstanceState.getInt ( "hours" );
-        }
 
         timeSetter ();
 
@@ -85,7 +78,6 @@ public class MainActivity2 extends AppCompatActivity {
                             play.setText ( "stop" );
                             playimg.setImageResource ( R.drawable.pause );
                             running = true;
-                            started = true;
                             break;
                         }
                         else {
@@ -116,6 +108,7 @@ public class MainActivity2 extends AppCompatActivity {
         outState.putInt ( "minutes",minutes );
         outState.putInt ( "hours",hours );
         outState.putInt ( "countSeconds",seconds );
+        outState.putBoolean ( "running",touched );
         super.onSaveInstanceState ( outState );
     }
 
@@ -126,16 +119,35 @@ public class MainActivity2 extends AppCompatActivity {
         minutes = savedInstanceState.getInt ( "minutes" );
         hours = savedInstanceState.getInt ( "hours" );
         seconds = savedInstanceState.getInt ( "countSeconds" );
+        running = savedInstanceState.getBoolean ( "running" );
+        if (running){
+            play.setText ( "stop" );
+            playimg.setImageResource ( R.drawable.pause );
+        }
+        else {
+            play.setText ( "play" );
+            playimg.setImageResource ( R.drawable.play );
+        }
         timeSetter ();
-        play.setText ( "play" );
-        playimg.setImageResource ( R.drawable.play );
-        Toast.makeText ( getApplicationContext (),String.valueOf ( seconds ),Toast.LENGTH_SHORT ).show ();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume ();
+        if (running){
+            play.setText ( "stop" );
+            playimg.setImageResource ( R.drawable.pause );
+        }
+        else {
+            play.setText ( "play" );
+            playimg.setImageResource ( R.drawable.play );
+        }
+        timeSetter ();
     }
 
     private void timeHandler(){
 
-        HandlerThread thread = new HandlerThread("MyHandlerThread");
+        thread = new HandlerThread("MyHandlerThread");
         thread.start();
         final Handler handler = new Handler(thread.getLooper());
 
@@ -165,6 +177,7 @@ public class MainActivity2 extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause ();
+        touched = running;
         running = false;
     }
 
@@ -216,7 +229,7 @@ public class MainActivity2 extends AppCompatActivity {
             public void onClick( View v ) {
                 full ();
                 alertDialog.cancel ();
-                if (play.getText ().toString () != "play"){
+                if (!play.getText ().toString ().equals ( "play" )){
                     running = true;
                 }
                 mediaPlayer2.start ();
